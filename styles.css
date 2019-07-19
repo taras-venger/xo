@@ -1,0 +1,53 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-image: url(img/blackboard.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+h1 {
+  font-family: 'Indie Flower', 'Arial', cursive;
+  font-weight: 400;
+  font-size: 70px;
+  color: #ffffff;
+  text-align: center;
+}
+
+button {
+  font-family: 'Indie Flower', 'Arial', cursive;
+  font-weight: 300;
+  font-size: 30px;
+  color: #327e4b;
+  background-color: #ffffff;
+  width: 20%;
+  margin-left: 40%;
+  margin-right: 40%;
+  padding: 5px 15px;
+  border: 0;
+  text-align: center;
+  cursor: pointer;
+}
+
+.table {
+  height: 450px;
+  width: 450px;
+  border: 2px solid #ffffff;
+  position: relative;
+  margin: 0 auto;
+}
+
+.cell {
+  height: 33.3%;
+  width: 33.3%;
+  border: 2px solid #ffffff;
+  float: left;
+}
+
+.cell:hover {
+  border: 5px solid #ffffff;
+}
