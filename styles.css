@@ -24,9 +24,8 @@ button {
   font-size: 30px;
   color: #327e4b;
   background-color: #ffffff;
-  width: 20%;
-  margin-left: 40%;
-  margin-right: 40%;
+  width: 250px;
+  margin-top: 20px;
   padding: 5px 15px;
   border: 0;
   text-align: center;
@@ -34,18 +33,23 @@ button {
 }
 
 .table {
-  height: 450px;
-  width: 450px;
+  height: 454px;
+  width: 454px;
   border: 2px solid #ffffff;
   position: relative;
   margin: 0 auto;
 }
 
 .cell {
-  height: 33.3%;
-  width: 33.3%;
+  height: 150px;
+  width: 150px;
   border: 2px solid #ffffff;
   float: left;
+  font-family: 'Indie Flower', 'Arial', cursive;
+  font-weight: 400;
+  font-size: 100px;
+  color: #ffffff;
+  text-align: center;
 }
 
 .cell:hover {
