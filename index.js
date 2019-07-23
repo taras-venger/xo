@@ -7,16 +7,9 @@ const state = {
     gameOver: false
 };
 
-const recordToState = (cell, player) => {
-    if (state.results[player].includes(cell)) {
-        alert('try again');
-    } else {
-        state.results[player].push(cell);
-    }
-}
-
+// Check if the game is over - step 1
 const matchByRowOrColumn = (arr, index) => {
-    // index = 0 to check if the game is over due to match by row, index = 1 for columns.
+    // index = 0 to check if the whole row matches, index = 1 to check columns.
     let count = 0;
     for (let el of arr) {
         el.split('-')[index] === arr[0].split('-')[index] ? count++ : '';
@@ -24,36 +17,74 @@ const matchByRowOrColumn = (arr, index) => {
     return count === 3;
 }
 
+// Check if the game is over - step 2
 const matchByDiagonal = arr => {
-    let count = 0;
+    let d1 = 0;
+    let d2 = 0
     for (let el of arr) {
-        el.split('-')[0] === el.split('-')[1] ? count++ : '';
+        let row = parseInt(el.split('-')[0]);
+        let column = parseInt(el.split('-')[1]);
+        row === column ? d1++ : '';
+        row + column === 4 ? d2++ : '';
     };
-    return count === 3;
+    return d1 === 3 || d2 === 3;
 }
 
-const gameOver = arr => matchByRowOrColumn(arr, 0) || matchByRowOrColumn(arr, 1) || matchByDiagonal(arr);
+// Check if the game is over - step 3
+const gameOver = arr => {
+    if (matchByRowOrColumn(arr, 0) ||
+        matchByRowOrColumn(arr, 1) ||
+        matchByDiagonal(arr)) {
+        state.gameOver = true;
+    };
+};
 
-function swithPlayer() {
-    if (state.currentPlayer === 'player1') {
-        state.currentPlayer = 'player2';
-    } else {
+
+function switchPlayer() {
+    state.currentPlayer === 'player1' ?
+        state.currentPlayer = 'player2' :
         state.currentPlayer = 'player1';
-    }
+};
+
+
+function markCell(id, player) {
+    let mark;
+    player === 'player1' ? mark = 'x' : mark = '0';
+    document.addEventListener('click', () => {
+        document.getElementById(id).innerHTML = mark;
+    });
+}
+
+
+const reset = () => {
+    state.results = { player1: [], player2: [] };
+    state.currentPlayer = 'player1';
+    state.gameOver = false;
+    document.querySelector('.cell').innerHTML = '';
 }
 
 // Put it all together
 function makeMove(selectedCell) {
-    // 1. Select active player
-    const activePlayer = state.currentPlayer;
+    if (!state.gameOver) {
 
-    // 2. Add cell coordinates to the state
-    recordToState(selectedCell, activePlayer);
+        const activePlayer = state.currentPlayer;
+        const allResults = [...state.results.player1, ...state.results.player2];
 
-    // 3. Check if the player has won the game
-    if (gameOver(state.results[activePlayer])) {
-        alert(`${activePlayer} won!`)
-    } else {
-        swithPlayer();
-    }
+        // 1. Check if the selected cell is available
+        if (allResults.includes(selectedCell)) {
+            alert('Selected cell is not available');
+        } else {
+            // 2. Add cell coordinates to the state
+            state.results[activePlayer].push(selectedCell);
+
+            // 3. Render changes to the UI
+            markCell(selectedCell, activePlayer);
+
+            // 4. Check if current player has won the game
+            gameOver(state.results[activePlayer]);
+            state.gameOver ?
+                alert(`${state.currentPlayer} won!`) :
+                switchPlayer();
+        };
+    };
 }
