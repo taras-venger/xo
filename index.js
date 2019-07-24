@@ -51,19 +51,11 @@ function markCell(id, player) {
     let mark;
     player === 'player1' ? mark = 'x' : mark = '0';
     document.addEventListener('click', () => {
-        document.getElementById(id).innerHTML = mark;
+        document.getElementById(id).innerText = mark;
     });
 }
 
 
-const reset = () => {
-    state.results = { player1: [], player2: [] };
-    state.currentPlayer = 'player1';
-    state.gameOver = false;
-    document.querySelector('.cell').innerHTML = '';
-}
-
-// Put it all together
 function makeMove(selectedCell) {
     if (!state.gameOver) {
 
@@ -88,3 +80,25 @@ function makeMove(selectedCell) {
         };
     };
 }
+
+
+const table = document.querySelector('.table')
+table.addEventListener('click', event => {
+    let id = event.target.id;
+    makeMove(id);
+});
+
+
+function resetGame() {
+    // Reset state
+    state.results = { player1: [], player2: [] };
+    state.currentPlayer = 'player1';
+    state.gameOver = false;
+
+    // Reset DOM
+    document.querySelector('.cell').innerText = '';
+}
+
+
+const startButton = document.querySelector('#start');
+startButton.addEventListener('click', resetGame);
