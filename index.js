@@ -39,55 +39,41 @@ const gameOver = arr => {
     };
 };
 
-
 function switchPlayer() {
     state.currentPlayer === 'player1' ?
         state.currentPlayer = 'player2' :
         state.currentPlayer = 'player1';
 };
 
-
 function markCell(id, player) {
     let mark;
     player === 'player1' ? mark = 'x' : mark = '0';
-    document.addEventListener('click', () => {
-        document.getElementById(id).innerText = mark;
-    });
-}
-
+    document.getElementById(id).innerText = mark;
+};
 
 function makeMove(selectedCell) {
     if (!state.gameOver) {
-
         const activePlayer = state.currentPlayer;
         const allResults = [...state.results.player1, ...state.results.player2];
 
-        // 1. Check if the selected cell is available
+        // Check if the selected cell is available
         if (allResults.includes(selectedCell)) {
             alert('Selected cell is not available');
         } else {
-            // 2. Add cell coordinates to the state
+            // Update state
             state.results[activePlayer].push(selectedCell);
+            gameOver(state.results[activePlayer]);
 
-            // 3. Render changes to the UI
+            // Update UI
             markCell(selectedCell, activePlayer);
 
-            // 4. Check if current player has won the game
-            gameOver(state.results[activePlayer]);
+            // Check if current player has won the game
             state.gameOver ?
-                alert(`${state.currentPlayer} won!`) :
+                setTimeout(() => alert(`${state.currentPlayer} won!`), 0) :
                 switchPlayer();
         };
     };
-}
-
-
-const table = document.querySelector('.table')
-table.addEventListener('click', event => {
-    let id = event.target.id;
-    makeMove(id);
-});
-
+};
 
 function resetGame() {
     // Reset state
@@ -96,9 +82,15 @@ function resetGame() {
     state.gameOver = false;
 
     // Reset DOM
-    document.querySelector('.cell').innerText = '';
-}
+    const cells = document.querySelector('.table').children;
+    for (let cell of cells) {
+        cell.innerText = '';
+    }
+};
 
+// Set event listeners
+const table = document.querySelector('.table');
+table.addEventListener('click', event => makeMove(event.target.id));
 
 const startButton = document.querySelector('#start');
 startButton.addEventListener('click', resetGame);
