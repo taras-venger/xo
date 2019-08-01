@@ -1,96 +1,127 @@
-const state = {
-    results: {
-        player1: [],
-        player2: []
-    },
-    currentPlayer: 'player1',
+let state = {
+    players: [
+        {
+            name: 'Player 1',
+            moves: [], // contains array of cells' coordinates: [[1, 1], [1, 2]...]
+            mark: 'X',
+        },
+        {
+            name: 'Player 2',
+            moves: [], // contains array of cells' coordinates: [[1, 1], [1, 2]...]
+            mark: '0',
+        },
+    ],
+    activePlayer: 0,
     gameOver: false
 };
 
-// Check if the game is over - step 1
-const matchByRowOrColumn = (arr, index) => {
-    // index = 0 to check if the whole row matches, index = 1 to check columns.
-    let count = 0;
-    for (let el of arr) {
-        el.split('-')[index] === arr[0].split('-')[index] ? count++ : '';
-    };
-    return count === 3;
-}
+const initialState = JSON.parse(JSON.stringify(state));
 
-// Check if the game is over - step 2
+function cellAvailability(cell) {
+    const selected = [...state.players[0].moves, ...state.players[1].moves];
+    const selectedStr = selected.map(el => el.toString());
+    return selectedStr.indexOf(cell.toString()) === -1;
+};
+
+// reseives an array of player's moves
+const matchByRowOrColumn = arr => {
+    const benchmark = arr[0];
+    let x = 0;
+    let y = 0;
+    for (let el of arr) {
+        el[0] === benchmark[0] ? x++ : '';
+        el[1] === benchmark[1] ? y++ : '';
+    };
+    return x === 3 || y === 3;
+};
+
+// reseives an array of player's moves
 const matchByDiagonal = arr => {
     let d1 = 0;
     let d2 = 0
     for (let el of arr) {
-        let row = parseInt(el.split('-')[0]);
-        let column = parseInt(el.split('-')[1]);
-        row === column ? d1++ : '';
-        row + column === 4 ? d2++ : '';
+        el[0] === el[1] ? d1++ : '';
+        el[0] + el[1] === 4 ? d2++ : '';
     };
     return d1 === 3 || d2 === 3;
-}
+};
 
-// Check if the game is over - step 3
-const gameOver = arr => {
-    if (matchByRowOrColumn(arr, 0) ||
-        matchByRowOrColumn(arr, 1) ||
-        matchByDiagonal(arr)) {
+const checkWin = arr => matchByRowOrColumn(arr) || matchByDiagonal(arr);
+
+const checkDraw = () => {
+    const selectedCells = [...state.players[0].moves, ...state.players[1].moves];
+    return selectedCells.length === 9 && !state.gameOver;
+};
+
+function gameOver(arr, name) {
+    if (checkWin(arr)) {
         state.gameOver = true;
+        setTimeout(() => alert(`${name} won!`), 0);
+    } else if (checkDraw()) {
+        state.gameOver = true;
+        setTimeout(() => alert(`Game over.`), 0);
     };
 };
 
 function switchPlayer() {
-    state.currentPlayer === 'player1' ?
-        state.currentPlayer = 'player2' :
-        state.currentPlayer = 'player1';
+    state.activePlayer === 0 ? state.activePlayer = 1 : state.activePlayer = 0;
 };
 
-function markCell(id, player) {
-    let mark;
-    player === 'player1' ? mark = 'x' : mark = '0';
-    document.getElementById(id).innerText = mark;
-};
-
-function makeMove(selectedCell) {
+function makeMove(coordinates, id) {
     if (!state.gameOver) {
-        const activePlayer = state.currentPlayer;
-        const allResults = [...state.results.player1, ...state.results.player2];
-
-        // Check if the selected cell is available
-        if (allResults.includes(selectedCell)) {
-            alert('Selected cell is not available');
-        } else {
-            // Update state
-            state.results[activePlayer].push(selectedCell);
-            gameOver(state.results[activePlayer]);
-
-            // Update UI
-            markCell(selectedCell, activePlayer);
-
-            // Check if current player has won the game
-            state.gameOver ?
-                setTimeout(() => alert(`${state.currentPlayer} won!`), 0) :
+        const activePlayer = state.activePlayer;
+        const name = state.players[activePlayer].name;
+        const moves = state.players[activePlayer].moves;
+        const mark = state.players[activePlayer].mark;
+        // Player's move
+        if (cellAvailability(coordinates)) {
+            moves.push(coordinates);
+            document.getElementById(id).innerText = mark;
+            gameOver(moves, name);
+            // Machine's move
+            if (!state.gameOver) {
                 switchPlayer();
+                state.activePlayer === 1 ? machineMove() : '';
+            }
+        } else {
+            alert('Selected cell is not available');
         };
     };
 };
 
-function resetGame() {
-    // Reset state
-    state.results = { player1: [], player2: [] };
-    state.currentPlayer = 'player1';
-    state.gameOver = false;
-
-    // Reset DOM
-    const cells = document.querySelector('.table').children;
-    for (let cell of cells) {
-        cell.innerText = '';
-    }
+function machineMove() {
+    // Identify available cells
+    const allCells = [[1, 1], [1, 2], [1, 3], [2, 1], [2, 2], [2, 3], [3, 1], [3, 2], [3, 3]];
+    const selectedCells = [...state.players[0].moves, ...state.players[1].moves];
+    const allCellsStr = allCells.map(cell => cell.toString());
+    const selectedStr = selectedCells.map(cell => cell.toString());
+    const availableCells = allCellsStr.filter(cell => !selectedStr.includes(cell));
+    // Select rendom cell
+    const random = Math.floor(Math.random() * availableCells.length);
+    const randomCell = availableCells[random].split(',');
+    const x = parseInt(randomCell[0]);
+    const y = parseInt(randomCell[1]);
+    const coordinates = [x, y];
+    const id = randomCell.join('-');
+    makeMove(coordinates, id);
 };
 
-// Set event listeners
+function resetGame() {
+    state = JSON.parse(JSON.stringify(initialState));
+    const cells = document.querySelectorAll('.cell');
+    for (let cell of cells) {
+        cell.innerText = '';
+    };
+};
+
 const table = document.querySelector('.table');
-table.addEventListener('click', event => makeMove(event.target.id));
+table.addEventListener('click', event => {
+    const x = parseInt(event.target.dataset.x);
+    const y = parseInt(event.target.dataset.y);
+    const coordinates = [x, y];
+    const id = event.target.id;
+    makeMove(coordinates, id);
+});
 
 const startButton = document.querySelector('#start');
 startButton.addEventListener('click', resetGame);
